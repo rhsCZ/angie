@@ -422,6 +422,21 @@ sub has_feature($) {
 		return 1;
 	}
 
+	if ($feature eq 'inet6') {
+		eval { require IO::Socket::IP; };
+		return 0 if $@;
+
+		my $s = IO::Socket::IP->new(
+			LocalAddr => '::1',
+			GetAddrInfoFlags => Socket::AI_NUMERICHOST(),
+			Listen => 1
+		);
+		return 0 unless $s;
+
+		$s->close;
+		return 1;
+	}
+
 	$self->{_build_env} = `$NGINX --build-env 2>&1`
 		if !defined $self->{_build_env};
 
